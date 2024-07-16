@@ -54,12 +54,16 @@ const AuthCard = () => {
                         Login
                     </Button>
                     <div className="flex w-full items-center justify-center gap-20">
-                        <Button variant="ghost" className="size-fit">
-                            <GoogleIcon className={"size-6"} />
-                        </Button>
-                        <Button variant="ghost" className="size-fit">
-                            <GithubIcon className={"size-6"} />
-                        </Button>
+                        <a href="http://localhost:8080/oauth2/authorization/google">
+                            <Button variant="ghost" className="size-fit">
+                                <GoogleIcon className={"size-6"} />
+                            </Button>
+                        </a>
+                        <a href="http://localhost:8080/oauth2/authorization/github">
+                            <Button variant="ghost" className="size-fit">
+                                <GithubIcon className={"size-6"} />
+                            </Button>
+                        </a>
                     </div>
                 </div>
                 <div className="mt-4 text-center text-sm">
