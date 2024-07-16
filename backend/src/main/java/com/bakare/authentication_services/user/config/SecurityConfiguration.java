@@ -27,6 +27,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                .oauth2Login(oauth2login ->oauth2login.loginPage("/"))
                 .sessionManagement(
                         manager->
                                 manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
