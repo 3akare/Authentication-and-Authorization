@@ -2,11 +2,36 @@ spring:
   security:
     oauth2:
       client:
+        provider:
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize
+            token-uri: https://github.com/login/oauth/access_token
+            user-info-uri: https://api.github.com/user
+            user-name-attribute: login
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+          gitlab:
+            authorization-uri: https://gitlab.remita.net/oauth/authorize
+            token-uri: https://gitlab.remita.net/oauth/token
+            user-info-uri: https://gitlab.remita.net/api/v4/user
+            user-name-attribute: username
         registration:
           github:
             client-id: ${GITHUB_CLIENT_ID:}
-            client-secret: ${GITHUB_SECRET:}
+            client-secret: ${GITHUB_CLIENT_SECRET:}
+            redirect-uri: "http://localhost:8080/login/oauth2/code/github"
+            scope: user,repo
           google:
             client-id: ${GOOGLE_CLIENT_ID:}
             client-secret: ${GOOGLE_CLIENT_SECRET:}
-# github-callback, http://localhost:8080/login/oauth2/code/github
+            redirect-uri: "http://localhost:8080/login/oauth2/code/google"
+            scope: profile,email
+          gitlab:
+            client-id: ${GITLAB_CLIENT_ID:}
+            client-secret: ${GITLAB_CLIENT_SECRET:}
+            redirect-uri: http://localhost:8080/login/oauth2/code/gitlab
+            authorization-grant-type: authorization_code
+            scope: read_user,api,read_api

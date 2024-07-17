@@ -1,4 +1,4 @@
-import { GoogleIcon, GithubIcon } from "@/components/icons"
+import { GoogleIcon, GithubIcon, GitLabIcon } from "@/components/icons"
 import { Button } from "@/components/ui/button"
 import {
     Card,
@@ -53,7 +53,7 @@ const AuthCard = () => {
                     <Button type="submit" className="w-full">
                         Login
                     </Button>
-                    <div className="flex w-full items-center justify-center gap-20">
+                    <div className="flex w-full items-center justify-center gap-10">
                         <a href="http://localhost:8080/oauth2/authorization/google">
                             <Button variant="ghost" className="size-fit">
                                 <GoogleIcon className={"size-6"} />
@@ -62,6 +62,11 @@ const AuthCard = () => {
                         <a href="http://localhost:8080/oauth2/authorization/github">
                             <Button variant="ghost" className="size-fit">
                                 <GithubIcon className={"size-6"} />
+                            </Button>
+                        </a>
+                        <a href="http://localhost:8080/oauth2/authorization/gitlab">
+                            <Button variant="ghost" className="size-fit">
+                                <GitLabIcon className={"size-6"} />
                             </Button>
                         </a>
                     </div>

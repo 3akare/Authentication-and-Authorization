@@ -27,13 +27,16 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth2login ->oauth2login.loginPage("/"))
-                .sessionManagement(
-                        manager->
-                                manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .oauth2Login(oauth2login ->oauth2login
+                    .loginPage("/")
+                    .defaultSuccessUrl("/api/v1/auth/token", true)
+                );
+//                .sessionManagement(
+//                        manager->
+//                                manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//                )
+//                .authenticationProvider(authenticationProvider)
+//                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
 }
