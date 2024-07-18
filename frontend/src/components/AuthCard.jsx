@@ -36,6 +36,15 @@ const AuthCard = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+
+        grecaptcha.ready(async () => {
+            grecaptcha.execute('6LdENRMqAAAAABEnMnDBgH7gPcMxiiTB0If9JYC5', { action: 'homepage' })
+                .then(async (token) => {
+                    // console.log({ token })
+                    
+                });
+        });
+
         try {
             const response = await axios.post(`http://localhost:8080/api/v1/auth/${isSignin ? "register" : "login"}`,
                 { username, email, password })
@@ -65,7 +74,7 @@ const AuthCard = () => {
             </CardHeader>
             <CardContent>
                 <div className="grid gap-4">
-                    <form className="grid gap-4">
+                    <form className="grid gap-4" onSubmit={handleSubmit}>
                         <div className="grid gap-2">
                             {isSignin && <>
                                 <Label htmlFor="username">Username</Label>
