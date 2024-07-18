@@ -17,7 +17,7 @@ public class VideoController {
 
     @GetMapping("/rickRoll")
     public ResponseEntity<Resource> getVideo() throws IOException{
-        Resource video = new ClassPathResource("static/videos/rick-roll.mp4");
+        Resource video = new ClassPathResource("videos/rick-roll.mp4");
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, "video/mp4");
         return new ResponseEntity<>(video, headers, HttpStatus.OK);
