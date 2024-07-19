@@ -13,9 +13,12 @@ const VideoPlayer = () => {
         <video
             ref={videoRef}
             autoPlay
+            controls
             loop
             width="640"
             height="360"
+            muted
+            playsInline
         >
             Your browser does not support the video tag.
         </video>
