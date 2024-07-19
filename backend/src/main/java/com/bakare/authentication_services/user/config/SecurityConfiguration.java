@@ -25,7 +25,6 @@ public class SecurityConfiguration {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request-> request
-                        .requestMatchers("/**").permitAll()
                        .requestMatchers("/api/v1/auth/**").permitAll()
 //                        .requestMatchers("/api/v1/video/**").permitAll()
                         .anyRequest().authenticated()
