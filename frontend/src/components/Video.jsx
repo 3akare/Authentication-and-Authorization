@@ -8,7 +8,6 @@ const VideoPlayer = () => {
             videoRef.current.src = 'http://localhost:8080/api/v1/videos/rickRoll';
         }
     }, []);
-
     return (
         <video
             ref={videoRef}
