@@ -9,18 +9,13 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import axios from "axios"
-
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"
 
 const AuthCard = () => {
     const [isSignin, setIsSignIn] = useState(true);
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-
-    const navigate = useNavigate();
 
     const handleUsername = (event) => {
         setUsername(event.target.value);
@@ -33,30 +28,6 @@ const AuthCard = () => {
     const handlePassword = (event) => {
         setPassword(event.target.value);
     }
-
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-
-        grecaptcha.ready(async () => {
-            grecaptcha.execute('6LdENRMqAAAAABEnMnDBgH7gPcMxiiTB0If9JYC5', { action: 'homepage' })
-                .then(async (token) => {
-                    // console.log({ token })
-                    
-                });
-        });
-
-        try {
-            const response = await axios.post(`http://localhost:8080/api/v1/auth/${isSignin ? "register" : "login"}`,
-                { username, email, password })
-
-            const { authToken } = response.data;
-            localStorage.setItem("token", authToken);
-            navigate("/dashboard")
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
     const handleClick = () => {
         setIsSignIn((state) => !state);
     }
@@ -74,7 +45,7 @@ const AuthCard = () => {
             </CardHeader>
             <CardContent>
                 <div className="grid gap-4">
-                    <form className="grid gap-4" onSubmit={handleSubmit}>
+                    <form className="grid gap-4">
                         <div className="grid gap-2">
                             {isSignin && <>
                                 <Label htmlFor="username">Username</Label>
@@ -101,9 +72,6 @@ const AuthCard = () => {
                         <div className="grid gap-2">
                             <div className="flex items-center">
                                 <Label htmlFor="password">Password</Label>
-                                {/* <p href="#" className="ml-auto inline-block text-sm underline">
-                                Forgot your password?
-                            </p> */}
                             </div>
                             <Input id="password" type="password" placeholder="Password" value={password} onChange={handlePassword} required />
                         </div>
@@ -112,17 +80,17 @@ const AuthCard = () => {
                         </Button>
                     </form>
                     <div className="flex w-full items-center justify-center gap-10">
-                        <a href="http://localhost:8080/oauth2/authorization/google">
+                        <a href="#">
                             <Button variant="ghost" className="size-fit">
                                 <GoogleIcon className={"size-6"} />
                             </Button>
                         </a>
-                        <a href="http://localhost:8080/oauth2/authorization/github">
+                        <a href="#">
                             <Button variant="ghost" className="size-fit">
                                 <GithubIcon className={"size-6"} />
                             </Button>
                         </a>
-                        <a href="http://localhost:8080/oauth2/authorization/gitlab">
+                        <a href="#">
                             <Button variant="ghost" className="size-fit">
                                 <GitLabIcon className={"size-6"} />
                             </Button>
@@ -131,7 +99,7 @@ const AuthCard = () => {
                 </div>
                 <div className="mt-4 text-center text-sm">
                     {!isSignin ? "Don't have an account? " : "Already have an account? "}
-                    {!isSignin ? <a href="#" className="underline" onClick={handleClick}>register</a> : <a href="#" className="underline" onClick={handleClick}>login</a>}
+                    {!isSignin ? <p className="underline" onClick={handleClick}>register</p> : <a href="#" className="underline" onClick={handleClick}>login</a>}
 
                 </div>
             </CardContent>
