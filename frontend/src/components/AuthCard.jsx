@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import axios from "axios"
 import { useState } from "react";
 
 const AuthCard = () => {
@@ -28,8 +29,29 @@ const AuthCard = () => {
     const handlePassword = (event) => {
         setPassword(event.target.value);
     }
+
     const handleClick = () => {
         setIsSignIn((state) => !state);
+    }
+
+    const oauthLogin = async (provider) => {
+        let authUrl;
+
+        switch (provider) {
+            case "google":
+                authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID}&redirect_uri=http://localhost:8080/login/callback&response_type=code&scope=email profile`;
+                break;
+            case "github":
+                authUrl = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}&redirect_uri=http://localhost:8080/login/callback`;
+                break;
+            case "gitlab":
+                authUrl = `https://gitlab.com/oauth/authorize?client_id=${import.meta.env.VITE_GITLAB_CLIENT_ID}&redirect_uri=http://localhost:8080/login/callback&response_type=code&scope=read_user`;
+                break;
+            default:
+                throw new Error("Unsupported provider");
+        }
+
+        window.location.href = authUrl;
     }
 
     return (
@@ -80,27 +102,20 @@ const AuthCard = () => {
                         </Button>
                     </form>
                     <div className="flex w-full items-center justify-center gap-10">
-                        <a href="#">
-                            <Button variant="ghost" className="size-fit">
-                                <GoogleIcon className={"size-6"} />
-                            </Button>
-                        </a>
-                        <a href="#">
-                            <Button variant="ghost" className="size-fit">
-                                <GithubIcon className={"size-6"} />
-                            </Button>
-                        </a>
-                        <a href="#">
-                            <Button variant="ghost" className="size-fit">
-                                <GitLabIcon className={"size-6"} />
-                            </Button>
-                        </a>
+                        <Button variant="ghost" className="size-fit" onClick={() => oauthLogin("google")}>
+                            <GoogleIcon className={"size-6"} />
+                        </Button>
+                        <Button variant="ghost" className="size-fit" onClick={() => oauthLogin("github")}>
+                            <GithubIcon className={"size-6"} />
+                        </Button>
+                        <Button variant="ghost" className="size-fit" onClick={() => oauthLogin("gitlab")}>
+                            <GitLabIcon className={"size-6"} />
+                        </Button>
                     </div>
                 </div>
                 <div className="mt-4 text-center text-sm">
                     {!isSignin ? "Don't have an account? " : "Already have an account? "}
-                    {!isSignin ? <p className="underline" onClick={handleClick}>register</p> : <a href="#" className="underline" onClick={handleClick}>login</a>}
-
+                    {!isSignin ? <span className="underline" onClick={handleClick}>register</span> : <span className="underline" onClick={handleClick}>login</span>}
                 </div>
             </CardContent>
         </Card>

@@ -1,14 +1,29 @@
-import { useEffect } from "react"
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from '@/contexts/AuthContext';
+import Login from "@/components/Login"
+import Callback from '@/components/Callback';
+import Dashboard from '@/components/Dashboard';
+import PrivateRoute from '@/components/PrivateRoute';
 
-import { Routes, Route } from "react-router-dom"
-import Home from "@/pages/Home"
-import Login from "@/pages/Login"
-
-export default function App() {
-	useEffect(()=>{},[])
+function App() {
 	return (
-		<Routes>
-			<Route path="/" element={<Login />}></Route>
-		</Routes>
-	)
+		<AuthProvider>
+			<Router>
+				<Routes>
+					<Route path="/" element={<Login />} />
+					<Route path="/login/callback" element={<Callback />} />
+					<Route
+						path="/dashboard"
+						element={
+							<PrivateRoute>
+								<Dashboard />
+							</PrivateRoute>
+						}
+					/>
+					<Route path="*" element={<Navigate to="/" replace />} />
+				</Routes>
+			</Router>
+		</AuthProvider>
+	);
 }
+export default App;

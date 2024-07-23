@@ -10,9 +10,9 @@ import org.springframework.web.servlet.resource.PathResourceResolver;
 
 import java.io.IOException;
 
-@Configuration
+//@Configuration
 public class WebConfiguration implements WebMvcConfigurer {
-
+    /* This configuration allows React routing to work on tomcat */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/**")

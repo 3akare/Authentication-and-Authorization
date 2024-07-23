@@ -35,3 +35,8 @@ spring:
             redirect-uri: http://localhost:8080/login/oauth2/code/gitlab
             authorization-grant-type: authorization_code
             scope: read_user,api,read_api
+
+github:
+  client:
+    id: ${spring.security.oauth2.client.registration.github.clientId}
+    secret: ${spring.security.oauth2.client.registration.github.clientSecret}
