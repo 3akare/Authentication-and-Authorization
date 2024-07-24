@@ -1,22 +1,45 @@
-import React, { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { AuthContext } from "@/context/AuthContext";
+import axios from "axios";
+import { useContext, useEffect, useRef } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
-function Callback() {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { handleCallback } = useAuth();
+const Callback = () => {
+  const baseUrl = "http://localhost:8080";
 
-    useEffect(() => {
-        const code = new URLSearchParams(location.search).get('code');
-        if (code) {
-            handleCallback(code).then(() => {
-                navigate('/dashboard');
-            });
-        }
-    }, [location, navigate, handleCallback]);
+  const { login, setLoading } = useContext(AuthContext);
+  const [callbackParams] = useSearchParams();
+  const navigate = useNavigate();
+  const codeProcessed = useRef(false);
 
-    return <div>Processing login...</div>;
-}
+  const getJWTToken = async (code) => {
+    try {
+      setLoading(true);
+      const res = await axios.post(`${baseUrl}/api/auth/github`, {
+        code,
+      });
+
+      if (res.status === 200) {
+        const { token, user, email } = res.data;
+        console.log(token, user, email);
+        login(token, user, email);
+        navigate("/", { replace: true });
+      }
+    } catch (error) {
+      console.error("Error", error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const code = callbackParams.get("code");
+    if (code && !codeProcessed.current) {
+      console.log("code flow token: ", code);
+      getJWTToken(code);
+      codeProcessed.current = true;
+    }
+  }, [callbackParams]);
+
+  return <p>loading...</p>;
+};
 
 export default Callback;

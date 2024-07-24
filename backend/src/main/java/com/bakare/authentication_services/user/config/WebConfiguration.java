@@ -1,7 +1,5 @@
 package com.bakare.authentication_services.user.config;
 
-import org.antlr.v4.runtime.misc.NotNull;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
