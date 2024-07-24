@@ -2,6 +2,12 @@ package com.bakare.authentication_services.user.controller;
 
 import com.bakare.authentication_services.user.dto.AuthRequestDTO;
 import com.bakare.authentication_services.user.dto.AuthResponseDTO;
+import com.bakare.authentication_services.user.dto.LoginDTO;
+import com.bakare.authentication_services.user.dto.LoginResponse;
+import com.bakare.authentication_services.user.dto.RegisterDTO;
+import com.bakare.authentication_services.user.entity.User;
+import com.bakare.authentication_services.user.service.AuthenticationService;
+import com.bakare.authentication_services.user.service.JwtService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
@@ -32,6 +38,29 @@ public class AuthenticationController {
 
     @Value("${github.client.secret}")
     private String clientSecret;
+
+    private final JwtService jwtService;
+    private final AuthenticationService authenticationService;
+
+    @PostMapping("/signup")
+    public ResponseEntity<User> register(@RequestBody RegisterDTO registerUserDto) {
+        User registeredUser = authenticationService.signup(registerUserDto);
+
+        return ResponseEntity.ok(registeredUser);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> authenticate(@RequestBody LoginDTO loginUserDto) {
+        User authenticatedUser = authenticationService.authenticate(loginUserDto);
+
+        String jwtToken = jwtService.generateToken(authenticatedUser);
+
+        LoginResponse loginResponse = new LoginResponse();
+        loginResponse.setToken(jwtToken);
+        loginResponse.setExpiresIn(jwtService.getExpirationTime());
+
+        return ResponseEntity.ok(loginResponse);
+    }
 
     @PostMapping("/github")
     public ResponseEntity<AuthResponseDTO> githubLogin(@RequestBody AuthRequestDTO authRequestDTO) {
@@ -82,6 +111,7 @@ public class AuthenticationController {
             return null;
         }
     }
+
     private Map<String, Object> accessUserApi(String accessToken) throws IOException, InterruptedException {
         ObjectMapper objectMapper = new ObjectMapper();
         AuthRequestDTO authRequestDTO = new AuthRequestDTO();
