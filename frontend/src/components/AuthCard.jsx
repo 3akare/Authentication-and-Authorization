@@ -1,5 +1,7 @@
-import { GoogleIcon, GithubIcon, GitLabIcon } from "@/components/Icons";
+import { AuthContext } from "@/context/AuthContext";
+import { GoogleIcon, GithubIcon, GitLabIcon } from "@/components/icons";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -12,13 +14,16 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import axios from "axios";
 
-import { useState } from "react";
+import { useState, useContext } from "react";
 
 const AuthCard = () => {
+  const { login } = useContext(AuthContext);
   const [isSignin, setIsSignIn] = useState(true);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const navigate = useNavigate();
 
   const handleUsername = (event) => {
     setUsername(event.target.value);
@@ -36,16 +41,61 @@ const AuthCard = () => {
     setIsSignIn((state) => !state);
   };
 
+  const handleSubmit = async (type) => {
+    try {
+      let res;
+      if (type === "Register") {
+        res = await axios.post(`http://localhost:8080/api/auth/signup`, {
+          name: username,
+          password,
+          email
+        });
+      }
+      else {
+        res = await axios.post(`http://localhost:8080/api/v1/auth/login`, {
+          email,
+          password
+        });
+      }
+
+      if (res.status === 200) {
+        const { token, user, email } = res.data;
+        login(token, user, email);
+        navigate("/", { replace: true });
+      }
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   const githubAuthorizatonServer = async () => {
-    console.log("here");
     if (
       !localStorage.getItem("token") ||
       localStorage.getItem("token") !== null
     )
-      window.location.href = `https://github.com/login/oauth/authorize?client_id=${
-        import.meta.env.VITE_GITHUB_CLIENT_ID
-      }&scope=user`;
+      window.location.href = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID
+        }&scope=user`;
   };
+
+  const googleAuthorizationServer = async () => {
+    if (
+      !localStorage.getItem("token") ||
+      localStorage.getItem("token") !== null
+    )
+      window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=http://localhost:5173/login/callback&response_type=code&client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID
+        }&scope=profile`;
+  };
+
+  const gitlabAuthorizationServer = async () => {
+    if (
+      !localStorage.getItem("token") ||
+      localStorage.getItem("token") !== null
+    )
+      window.location.href = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID
+        }&scope=pro`;
+  };
+
 
   return (
     <Card className="mx-auto max-w-sm">
@@ -60,7 +110,7 @@ const AuthCard = () => {
       </CardHeader>
       <CardContent>
         <div className="grid gap-4">
-          <form className="grid gap-4">
+          <div className="grid gap-4">
             <div className="grid gap-2">
               {isSignin && (
                 <>
@@ -101,18 +151,14 @@ const AuthCard = () => {
                 autoComplete="true"
               />
             </div>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" onClick={() => handleSubmit(isSignin ? "Register" : "Login")}>
               {isSignin ? "Register" : "Login"}
             </Button>
-          </form>
+          </div>
           <div className="flex w-full items-center justify-center gap-10">
-            <a
-              href="#"
-              variant="ghost"
-              className={cn(buttonVariants({ variant: "ghost" }))}
-            >
+            <Button variant="ghost" onClick={googleAuthorizationServer}>
               <GoogleIcon className={"size-6"} />
-            </a>
+            </Button>
             <Button variant="ghost" onClick={githubAuthorizatonServer}>
               <GithubIcon className={"size-6"} />
             </Button>

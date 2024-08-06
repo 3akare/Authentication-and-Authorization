@@ -1,10 +1,6 @@
 package com.bakare.authentication_services.user.controller;
 
-import com.bakare.authentication_services.user.dto.AuthRequestDTO;
-import com.bakare.authentication_services.user.dto.AuthResponseDTO;
-import com.bakare.authentication_services.user.dto.LoginDTO;
-import com.bakare.authentication_services.user.dto.LoginResponse;
-import com.bakare.authentication_services.user.dto.RegisterDTO;
+import com.bakare.authentication_services.user.dto.*;
 import com.bakare.authentication_services.user.entity.User;
 import com.bakare.authentication_services.user.service.AuthenticationService;
 import com.bakare.authentication_services.user.service.JwtService;
@@ -26,8 +22,8 @@ import java.net.http.HttpResponse;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
 public class AuthenticationController {
 
     private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
@@ -43,10 +39,8 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping("/signup")
-    public ResponseEntity<User> register(@RequestBody RegisterDTO registerUserDto) {
-        User registeredUser = authenticationService.signup(registerUserDto);
-
-        return ResponseEntity.ok(registeredUser);
+    public ResponseEntity<AuthResponseDTO> register(@RequestBody RegisterDTO registerUserDto) {
+        return ResponseEntity.ok(authenticationService.signup(registerUserDto));
     }
 
     @PostMapping("/login")
@@ -64,30 +58,28 @@ public class AuthenticationController {
 
     @PostMapping("/github")
     public ResponseEntity<AuthResponseDTO> githubLogin(@RequestBody AuthRequestDTO authRequestDTO) {
-        AuthResponseDTO authResponseDTO = new AuthResponseDTO();
-
         authRequestDTO.setClient_id(clientId);
         authRequestDTO.setClient_secret(clientSecret);
         try{
             ObjectMapper objectMapper = new ObjectMapper();
             String requestBody = objectMapper.writeValueAsString(authRequestDTO);
-
-//            log.info("{} {}", requestBody, authRequestDTO);
             var accessTokenResponse = getAccessToken(requestBody);
             assert accessTokenResponse != null;
-
             var accessUserApiResponse = accessUserApi((String) accessTokenResponse.get("access_token"));
 
-            authResponseDTO.setEmail((String) accessUserApiResponse.get("email"));
-            authResponseDTO.setUser((String) accessUserApiResponse.get("name"));
-            authResponseDTO.setToken((String) accessTokenResponse.get("access_token"));
-            return ResponseEntity.ok(authResponseDTO);
+            RegisterDTO registerDTO = new RegisterDTO();
+            registerDTO.setEmail((String) accessUserApiResponse.get("email"));
+            registerDTO.setName((String) accessUserApiResponse.get("name"));
+            registerDTO.setPassword("hahah123$ajaj");
+
+            return ResponseEntity.ok(authenticationService.signup(registerDTO));
         }
         catch (IOException | InterruptedException error){
             log.info("Http Error: {}", error.getLocalizedMessage());
             return null;
         }
     }
+
     private Map<String, Object> getAccessToken(String requestBody) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();

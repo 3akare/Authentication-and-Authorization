@@ -1,5 +1,6 @@
 package com.bakare.authentication_services.user.service;
 
+import com.bakare.authentication_services.user.dto.AuthResponseDTO;
 import com.bakare.authentication_services.user.dto.LoginDTO;
 import com.bakare.authentication_services.user.dto.RegisterDTO;
 import com.bakare.authentication_services.user.entity.User;
@@ -12,27 +13,36 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthenticationService {
     private final UserRepository userRepository;
-
     private final PasswordEncoder passwordEncoder;
-
     private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
     public AuthenticationService(
         UserRepository userRepository,
         AuthenticationManager authenticationManager,
-        PasswordEncoder passwordEncoder
+        PasswordEncoder passwordEncoder,
+        JwtService jwtService
     ) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
-    public User signup(RegisterDTO input) {
+    public AuthResponseDTO signup(RegisterDTO input) {
         User user = new User();
         user.setName(input.getName());
         user.setEmail(input.getEmail());
         user.setPassword(passwordEncoder.encode(input.getPassword()));
-        return userRepository.save(user);
+
+        userRepository.save(user);
+
+        AuthResponseDTO authResponseDTO = new AuthResponseDTO();
+        authResponseDTO.setUsername(input.getName());
+        authResponseDTO.setToken(jwtService.generateToken(user));
+        authResponseDTO.setEmail(input.getEmail());
+
+        return authResponseDTO;
     }
 
     public User authenticate(LoginDTO input) {
