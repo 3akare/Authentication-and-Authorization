@@ -6,6 +6,8 @@ import com.bakare.authentication_services.user.service.AuthenticationService;
 import com.bakare.authentication_services.user.service.JwtService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -30,10 +32,16 @@ public class AuthenticationController {
     HttpClient httpClient = HttpClient.newHttpClient();
 
     @Value("${github.client.id}")
-    private String clientId;
+    private String github_clientId;
 
     @Value("${github.client.secret}")
-    private String clientSecret;
+    private String github_clientSecret;
+
+    @Value("${google.client.id}")
+    private String google_clientId;
+
+    @Value("${google.client.secret}")
+    private String google_clientSecret;
 
     private final JwtService jwtService;
     private final AuthenticationService authenticationService;
@@ -44,7 +52,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticate(@RequestBody LoginDTO loginUserDto) {
+    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginDTO loginUserDto) {
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
 
         String jwtToken = jwtService.generateToken(authenticatedUser);
@@ -58,14 +66,16 @@ public class AuthenticationController {
 
     @PostMapping("/github")
     public ResponseEntity<AuthResponseDTO> githubLogin(@RequestBody AuthRequestDTO authRequestDTO) {
-        authRequestDTO.setClient_id(clientId);
-        authRequestDTO.setClient_secret(clientSecret);
+        authRequestDTO.setClient_id(github_clientId);
+        authRequestDTO.setClient_secret(github_clientSecret);
+
+        log.info("github");
         try{
             ObjectMapper objectMapper = new ObjectMapper();
             String requestBody = objectMapper.writeValueAsString(authRequestDTO);
-            var accessTokenResponse = getAccessToken(requestBody);
+            var accessTokenResponse = githubAccessToken(requestBody);
             assert accessTokenResponse != null;
-            var accessUserApiResponse = accessUserApi((String) accessTokenResponse.get("access_token"));
+            var accessUserApiResponse = githubAccessUserAPI((String) accessTokenResponse.get("access_token"));
 
             RegisterDTO registerDTO = new RegisterDTO();
             registerDTO.setEmail((String) accessUserApiResponse.get("email"));
@@ -80,7 +90,65 @@ public class AuthenticationController {
         }
     }
 
-    private Map<String, Object> getAccessToken(String requestBody) {
+    @PostMapping("/google")
+    public ResponseEntity<AuthResponseDTO> googleLogin(@RequestBody GoogleAuthRequestDto authRequestDTO){
+        authRequestDTO.setClient_id(google_clientId);
+        authRequestDTO.setClient_secret(google_clientSecret);
+        authRequestDTO.setGrant_type("authorization_code");
+        authRequestDTO.setRedirect_uri("http://localhost:5173/login/callback");
+
+        log.info("google");
+        log.info("{}", List.of(authRequestDTO.getClient_id(), authRequestDTO.getGrant_type(), authRequestDTO.getRedirect_uri(), authRequestDTO.getClient_id(), authRequestDTO.getClient_secret()));
+
+        try{
+            ObjectMapper objectMapper = new ObjectMapper();
+            String requestBody = objectMapper.writeValueAsString(authRequestDTO);
+            var accessTokenResponse = googleAccessToken(requestBody);
+
+            log.info("{}",accessTokenResponse);
+
+            assert accessTokenResponse != null;
+            var accessUserApiResponse = googleAccessUserAPI((String) accessTokenResponse.get("access_token"));
+
+            log.info("response: {}", accessUserApiResponse);
+            RegisterDTO registerDTO = new RegisterDTO();
+            registerDTO.setEmail((String) accessUserApiResponse.get("email"));
+            registerDTO.setName((String) accessUserApiResponse.get("name"));
+            registerDTO.setPassword("hahah123$ajaj");
+
+            return ResponseEntity.ok(authenticationService.signup(registerDTO));
+        }
+        catch (IOException | InterruptedException error){
+            log.info("Http Error (2): {}", error.getLocalizedMessage());
+            return null;
+        }
+}
+
+    private Map<String, Object> googleAccessToken(String requestBody) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://oauth2.googleapis.com/token"))
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                return objectMapper.readValue(response.body(), new TypeReference<Map<String, Object>>() {});
+            } else {
+                log.error("Failed to get access token (2). Status code: {},{}", response.statusCode(), response.body());
+                return null;
+            }
+        } catch (IOException | InterruptedException e) {
+            log.error("Error while retrieving access token (2): {}", e.getMessage());
+            return null;
+        }
+    }
+
+    private Map<String, Object> githubAccessToken(String requestBody) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             HttpRequest request = HttpRequest.newBuilder()
@@ -104,12 +172,24 @@ public class AuthenticationController {
         }
     }
 
-    private Map<String, Object> accessUserApi(String accessToken) throws IOException, InterruptedException {
+    private Map<String, Object> githubAccessUserAPI(String accessToken) throws IOException, InterruptedException {
         ObjectMapper objectMapper = new ObjectMapper();
         AuthRequestDTO authRequestDTO = new AuthRequestDTO();
 
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create("https://api.github.com/user"))
+            .header("Authorization","Bearer "+ accessToken)
+            .build();
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        return objectMapper.readValue(response.body(), new TypeReference<Map<String, Object>>() {});
+    }
+
+    private Map<String, Object> googleAccessUserAPI(String accessToken) throws IOException, InterruptedException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        AuthRequestDTO authRequestDTO = new AuthRequestDTO();
+
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create("https://www.googleapis.com/oauth2/v3/userinfo"))
             .header("Authorization","Bearer "+ accessToken)
             .build();
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());

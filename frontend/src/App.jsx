@@ -5,6 +5,7 @@ import Callback from "@/components/Callback";
 import { useContext } from "react";
 import { AuthContext } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Loader from "./components/Loader";
 
 const App = () => {
   const { loading } = useContext(AuthContext);
@@ -12,7 +13,7 @@ const App = () => {
   return (
     <>
       {loading ? (
-        <>loading...</>
+        <Loader />
       ) : (
         <Router>
           <Routes>

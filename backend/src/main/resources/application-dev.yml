@@ -40,3 +40,7 @@ github:
   client:
     id: ${spring.security.oauth2.client.registration.github.clientId}
     secret: ${spring.security.oauth2.client.registration.github.clientSecret}
+google:
+  client:
+    id: ${spring.security.oauth2.client.registration.google.clientId}
+    secret: ${spring.security.oauth2.client.registration.google.clientSecret}

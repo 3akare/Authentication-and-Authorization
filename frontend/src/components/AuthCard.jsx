@@ -52,7 +52,8 @@ const AuthCard = () => {
         });
       }
       else {
-        res = await axios.post(`http://localhost:8080/api/v1/auth/login`, {
+        console.log(type)
+        res = await axios.post(`http://localhost:8080/api/auth/login`, {
           email,
           password
         });
@@ -83,19 +84,8 @@ const AuthCard = () => {
       !localStorage.getItem("token") ||
       localStorage.getItem("token") !== null
     )
-      window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=http://localhost:5173/login/callback&response_type=code&client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID
-        }&scope=profile`;
+      window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=http://localhost:5173/login/callback&response_type=code&client_id=${import.meta.env.VITE_GOOGLE_CLIENT_ID}&scope=email%20profile`;
   };
-
-  const gitlabAuthorizationServer = async () => {
-    if (
-      !localStorage.getItem("token") ||
-      localStorage.getItem("token") !== null
-    )
-      window.location.href = `https://github.com/login/oauth/authorize?client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID
-        }&scope=pro`;
-  };
-
 
   return (
     <Card className="mx-auto max-w-sm">
@@ -162,13 +152,6 @@ const AuthCard = () => {
             <Button variant="ghost" onClick={githubAuthorizatonServer}>
               <GithubIcon className={"size-6"} />
             </Button>
-            <a
-              href="#"
-              variant="ghost"
-              className={cn(buttonVariants({ variant: "ghost" }))}
-            >
-              <GitLabIcon className={"size-6"} />
-            </a>
           </div>
         </div>
         <div className="mt-4 text-center text-sm">

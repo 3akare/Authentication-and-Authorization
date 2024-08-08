@@ -2,6 +2,7 @@ import { AuthContext } from "@/context/AuthContext";
 import axios from "axios";
 import { useContext, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import Loader from "./Loader";
 
 const Callback = () => {
   const baseUrl = "http://localhost:8080";
@@ -14,13 +15,11 @@ const Callback = () => {
   const getJWTToken = async (code) => {
     try {
       setLoading(true);
-      const res = await axios.post(`${baseUrl}/api/auth/github`, {
-        code,
-      });
 
+      const res = code.length > 20 ?
+        await axios.post(`${baseUrl}/api/auth/google`, { code }) : await axios.post(`${baseUrl}/api/auth/github`, { code });
       if (res.status === 200) {
         const { token, user, email } = res.data;
-        console.log(token, user, email);
         login(token, user, email);
         navigate("/", { replace: true });
       }
@@ -39,7 +38,7 @@ const Callback = () => {
     }
   }, [callbackParams]);
 
-  return <p>loading...</p>;
+  return <Loader />;
 };
 
 export default Callback;

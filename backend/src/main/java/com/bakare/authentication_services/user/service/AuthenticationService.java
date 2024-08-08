@@ -5,6 +5,8 @@ import com.bakare.authentication_services.user.dto.LoginDTO;
 import com.bakare.authentication_services.user.dto.RegisterDTO;
 import com.bakare.authentication_services.user.entity.User;
 import com.bakare.authentication_services.user.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthenticationService {
+    private static final Logger log = LoggerFactory.getLogger(AuthenticationService.class);
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
@@ -52,6 +55,16 @@ public class AuthenticationService {
                 input.getPassword()
             )
         );
+
+        log.info("{}", authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        input.getEmail(),
+                        input.getPassword()
+                )
+        ));
+
+        log.info("{}",  userRepository.findByEmail(input.getEmail())
+                .orElseThrow());
 
         return userRepository.findByEmail(input.getEmail())
             .orElseThrow();
